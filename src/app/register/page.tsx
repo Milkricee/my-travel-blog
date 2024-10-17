@@ -1,19 +1,17 @@
 'use client';
 import Link from 'next/link';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 export default function RegisterPage() {
-  // State für die Registrierungsinformationen
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-
-  // Fehlerstatus für nicht übereinstimmende Passwörter
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   // Funktion zum Behandeln der Registrierung
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Überprüfung, ob die Passwörter übereinstimmen
@@ -22,9 +20,31 @@ export default function RegisterPage() {
       return;
     }
 
-    // Wenn die Passwörter übereinstimmen, weiterfahren
-    setError(''); // Fehler zurücksetzen
-    alert(`Registriert als: ${username}, E-Mail: ${email}`);
+    // Fehler zurücksetzen
+    setError('');
+
+    try {
+      // API-Request senden
+      const response = await fetch('/api/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSuccess('Registrierung erfolgreich!');
+      } else {
+        setError(data.error || 'Fehler bei der Registrierung');
+      }
+    } catch (err: unknown) {
+      console.error('Error during registration:', err); // Fehler in der Konsole ausgeben
+      setError('Netzwerkfehler, bitte später erneut versuchen.');
+    }
+    
   };
 
   return (
@@ -92,6 +112,9 @@ export default function RegisterPage() {
 
         {/* Fehlermeldung bei nicht übereinstimmenden Passwörtern */}
         {error && <p className="text-red-500">{error}</p>}
+
+        {/* Erfolgsnachricht */}
+        {success && <p className="text-green-500">{success}</p>}
 
         <button
           type="submit"
