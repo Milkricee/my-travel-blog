@@ -2,7 +2,6 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import bcrypt from 'bcrypt';
 import db from '../../db';
 
-// Funktion zum Abrufen eines Benutzers nach E-Mail
 interface User {
   id: number;
   username: string;
@@ -10,24 +9,25 @@ interface User {
   password: string;
 }
 
-const getUserByEmail = (email: string): Promise<User | null> => {
+// Funktion zum Abrufen eines Benutzers nach Benutzernamen
+const getUserByUsername = (username: string): Promise<User | undefined> => {
   return new Promise((resolve, reject) => {
-    db.get('SELECT * FROM users WHERE email = ?', [email], (err: Error | null, row: User | undefined) => {
+    db.get('SELECT * FROM users WHERE username = ?', [username], (err: Error | null, row: User | undefined) => {
       if (err) {
         return reject(err);
       }
-      resolve(row || null);
+      resolve(row);
     });
   });
 };
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
-    const { email, password } = req.body;
+    const { username, password } = req.body; // Benutzername statt E-Mail verwenden
 
     try {
-      // Benutzer anhand der E-Mail abrufen
-      const user = await getUserByEmail(email);
+      // Benutzer anhand des Benutzernamens abrufen
+      const user = await getUserByUsername(username);
       if (!user) {
         return res.status(400).json({ error: 'User not found' });
       }
@@ -46,7 +46,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(500).json({ error: 'Internal server error' });
     }
   } else {
-    // Wenn eine andere HTTP-Methode verwendet wird
     res.setHeader('Allow', ['POST']);
     return res.status(405).end(`Method ${req.method} Not Allowed`);
   }
