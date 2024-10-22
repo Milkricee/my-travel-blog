@@ -37,7 +37,8 @@ export default function Home() {
       <header className="w-full bg-blue-600 p-6 shadow-lg">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center">
-            <Image src="/assets/cat.png" alt="Logo" width={50} height={50} className="mr-2" />
+          <Image src="/assets/cat.png" alt="Logo" width={90} height={90} className="mr-2" />
+
             <h1 className="text-3xl font-bold text-white">Travelblog</h1>
           </div>
           <div className="space-x-4">
