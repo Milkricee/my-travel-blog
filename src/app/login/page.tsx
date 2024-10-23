@@ -1,35 +1,28 @@
 'use client';
 import { useState } from 'react';
+import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation'; // useRouter importieren
 import Link from 'next/link';
 
 export default function LoginPage() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const router = useRouter(); // useRouter-Hook initialisieren
+  const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
   
-    // Beispiel-Login-Anfrage (an deine API-Route)
-    try {
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }), // Benutzername statt Email senden
-      });
-  
-      if (response.ok) {
-        router.push('/'); // Bei Erfolg zur Hauptseite weiterleiten
-      } else {
-        const data = await response.json();
-        setError(data.error || 'Fehler beim Login.');
-      }
-    } catch {
-      setError('Netzwerkfehler. Bitte versuche es später erneut.');
+    const result = await signIn('credentials', {
+      redirect: false,
+      email,
+      password,
+    });
+
+    if (result?.error) {
+      setError(result.error);
+    } else {
+      router.push('/'); // Weiterleitung zur Hauptseite bei Erfolg
     }
   };
   
@@ -39,12 +32,12 @@ export default function LoginPage() {
         <h2 className="text-2xl font-bold text-center text-gray-700">Login</h2>
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700">Benutzername</label>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
             <input
-              type="text"
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
               className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
             />
